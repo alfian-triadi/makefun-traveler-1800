@@ -28,11 +28,25 @@ mkdirSync(destination, { recursive: true });
 const sentence =
   "Picture a vast library holding more letters, books and songs than any man could read in a life, which any man may open from his parlour and read in an instant, and answer back just as fast.";
 
-if (sentence.length > 200) {
-  throw new Error(`entry is ${sentence.length} characters, over the 200 limit`);
+// Entry limits from the kit gate: /output/entry.txt must be UTF-8,
+// 1–200 characters, a single line, not whitespace-only.
+const MIN_ENTRY_CHARS = 1;
+const MAX_ENTRY_CHARS = 200;
+
+function validateEntry(text: string): void {
+  if (text.length < MIN_ENTRY_CHARS || text.length > MAX_ENTRY_CHARS) {
+    throw new Error(
+      `entry must be ${MIN_ENTRY_CHARS}-${MAX_ENTRY_CHARS} characters, got ${text.length}`
+    );
+  }
+  if (text.trim().length === 0) {
+    throw new Error("entry is empty or whitespace only");
+  }
+  if (/\r|\n/.test(text)) {
+    throw new Error("entry must be a single line");
+  }
 }
-if (sentence.trim().length === 0) {
-  throw new Error("entry is empty");
-}
+
+validateEntry(sentence);
 
 writeFileSync(join(destination, "entry.txt"), sentence, "utf8");
